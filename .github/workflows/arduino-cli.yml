@@ -16,10 +16,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - sketch: examples/Ethernet_ArtNet
-            fqbn: arduino:avr:uno
-          - sketch: examples/esp8266_ArtNet
-            fqbn: esp8266:esp8266:nodemcuv2
+          - sketch: examples/Serial2ToSerial
+            fqbn: rp2040:rp2040:rpipico2
 
     steps:
       - name: Checkout
@@ -30,12 +28,8 @@ jobs:
 
       - name: Install Arduino cores
         run: |
-          arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
-          arduino-cli core install arduino:avr
-          arduino-cli core install esp8266:esp8266 --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
-
-      - name: Install Arduino libraries
-        run: arduino-cli lib install Ethernet
+          arduino-cli core update-index --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+          arduino-cli core install rp2040:rp2040 --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
 
       - name: Compile ${{ matrix.sketch }}
         run: arduino-cli compile --fqbn ${{ matrix.fqbn }} --library . ${{ matrix.sketch }}
