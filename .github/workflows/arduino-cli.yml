@@ -1,0 +1,41 @@
+name: Arduino CLI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  compile-examples:
+    name: Compile examples
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sketch: examples/Ethernet_ArtNet
+            fqbn: arduino:avr:uno
+          - sketch: examples/esp8266_ArtNet
+            fqbn: esp8266:esp8266:nodemcuv2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install Arduino cores
+        run: |
+          arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+          arduino-cli core install arduino:avr
+          arduino-cli core install esp8266:esp8266 --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
+
+      - name: Install Arduino libraries
+        run: arduino-cli lib install Ethernet
+
+      - name: Compile ${{ matrix.sketch }}
+        run: arduino-cli compile --fqbn ${{ matrix.fqbn }} --library . ${{ matrix.sketch }}
